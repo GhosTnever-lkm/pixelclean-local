@@ -1,0 +1,11 @@
+{
+  "name": "pixelclean-local",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check app.js && node --check core.js && node --test",
+    "test": "node --test",
+    "start": "python -m http.server 4173"
+  }
+}

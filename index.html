@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Remove embedded metadata from JPEG and PNG images locally in your browser. No upload, no account, no server processing.">
+  <title>PixelClean Local — remove image metadata privately</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="#top" aria-label="PixelClean Local home"><span class="brand-mark">◈</span> PixelClean <span>LOCAL</span></a><a class="github-link" href="https://github.com/GhosTnever-lkm/pixelclean-local">Source code ↗</a></header>
+  <main id="top" class="layout">
+    <section class="intro"><p class="eyebrow">PRIVATE IMAGE CLEANER · NO UPLOAD</p><h1>Share the image.<br><span>Not its hidden metadata.</span></h1><p class="lede">Re-encode JPEG and PNG images in this browser to create a clean copy. Embedded camera, date, and location metadata is not copied into the output.</p><div class="privacy-note"><span class="dot"></span> Processing happens on this device. The original stays untouched.</div></section>
+    <section class="workspace" aria-label="Image cleaner">
+      <div class="panel upload-panel"><div class="panel-title"><span class="step">01</span><div><h2>Choose images</h2><p>JPEG or PNG · up to 20 MiB each · 20 files per batch</p></div></div>
+        <label class="dropzone" for="image-input"><span class="upload-symbol">↑</span><strong>Drop images here or <u>browse files</u></strong><small>Only JPEG and PNG · files stay in your browser</small></label>
+        <input id="image-input" type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" multiple hidden>
+        <ul id="queue" class="queue" aria-label="Selected images"></ul>
+        <div class="controls"><label for="output-format">Cleaned copy format</label><select id="output-format"><option value="same">Keep input format</option><option value="png">PNG</option><option value="jpeg">JPEG</option></select>
+          <div id="quality-row" class="quality-row" hidden><label for="quality">JPEG quality <span id="quality-value">92%</span></label><input id="quality" type="range" min="0.7" max="1" step="0.01" value="0.92"></div>
+          <p class="format-hint">Changing a transparent PNG to JPEG fills transparent pixels with white.</p>
+        </div>
+        <div class="actions"><button id="clean-button" class="primary" type="button" disabled>Clean metadata</button><button id="clear-button" class="secondary" type="button" disabled>Clear</button></div>
+        <p id="status" class="status" role="status" aria-live="polite">Choose images to begin.</p>
+      </div>
+      <aside class="panel info-panel"><div class="panel-title"><span class="step">02</span><div><h2>What changes</h2><p>Review the output before sharing.</p></div></div>
+        <div class="feature"><span>⌖</span><div><strong>Private by design</strong><p>No network requests, uploads, analytics, or server-side processing.</p></div></div>
+        <div class="feature"><span>◉</span><div><strong>Metadata is discarded</strong><p>The browser decodes pixels and encodes a new image. EXIF, GPS, camera details, and embedded metadata are not copied.</p></div></div>
+        <div class="feature"><span>↗</span><div><strong>Keep the original</strong><p>Download a separate cleaned copy. This tool does not overwrite your source files.</p></div></div>
+        <div class="notice"><strong>Format limitation</strong><p>JPEG and PNG only. Re-encoding may change file size or image quality. This tool does not inspect or certify every metadata field; always review the output you plan to share.</p></div>
+        <div class="privacy-footer"><span>LOCAL ONLY</span><span>VERSION 0.1.0</span></div>
+      </aside>
+    </section>
+  </main>
+  <footer><span>PixelClean Local · MIT</span><span>Images are read only in this tab and never sent to a server.</span></footer>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
