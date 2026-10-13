@@ -18,7 +18,7 @@ It is a best-effort metadata removal workflow, not a forensic certification tool
 
 ## Use it
 
-Open the [live app](https://ghostnever-lkm.github.io/pixelclean-local/), choose JPEG/PNG images, select an output format, and click **Clean metadata**. Download each cleaned copy individually. No command-line tools or installation are required.
+Open the [live app](https://ghostnever-lkm.github.io/pixelclean-local/), choose JPEG/PNG images with the keyboard or mouse, select an output format, and click **Clean metadata**. Download each cleaned copy individually. Before starting another batch, download any ready copies and clear the queue. No command-line tools or installation are required.
 
 Run locally by opening `index.html`, or serve the folder:
 
