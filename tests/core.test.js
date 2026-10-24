@@ -19,7 +19,7 @@ function pngBlob(chunks = []) {
 
 const staticPng = pngBlob([["IDAT"]]);
 const png = (overrides = {}) => ({ name: "map.png", type: "image/png", size: staticPng.size,
-  slice: (start, end) => staticPng.slice(start, end), ...overrides });
+  arrayBuffer: () => staticPng.arrayBuffer(), ...overrides });
 
 test("accepts bounded JPEG and PNG only", () => {
   assert.equal(validateImageMetadata(png()), null);
@@ -121,10 +121,31 @@ test("rejects APNG before decoding instead of silently exporting one frame", asy
   globalThis.createImageBitmap = async () => { decoded = true; throw new Error("should not decode"); };
   globalThis.document = {};
   const animatedBlob = pngBlob([["acTL", new Uint8Array(8)], ["IDAT"]]);
-  const animatedPng = png({ size: animatedBlob.size, slice: (start, end) => animatedBlob.slice(start, end) });
+  const animatedPng = png({ size: animatedBlob.size, arrayBuffer: () => animatedBlob.arrayBuffer() });
   try {
     await assert.rejects(stripImageMetadata(animatedPng), /Animated PNG.*not supported/);
     assert.equal(decoded, false);
+  } finally {
+    globalThis.createImageBitmap = oldBitmap;
+    globalThis.document = oldDocument;
+  }
+});
+
+test("scans many PNG chunks with one bounded file read", async () => {
+  const chunkedPng = pngBlob([...Array.from({ length: 5000 }, () => ["tEXt"]), ["IDAT"]]);
+  let reads = 0;
+  const file = png({
+    size: chunkedPng.size,
+    async arrayBuffer() { reads += 1; return chunkedPng.arrayBuffer(); },
+    slice() { throw new Error("PNG scanner should not read one chunk at a time."); },
+  });
+  const oldBitmap = globalThis.createImageBitmap;
+  const oldDocument = globalThis.document;
+  globalThis.createImageBitmap = async () => ({ width: 8, height: 8, close() {} });
+  globalThis.document = { createElement() { return { width: 0, height: 0, getContext() { return { fillRect() {}, drawImage() {} }; }, toBlob(callback, type) { callback(new Blob(["clean"], { type })); } }; } };
+  try {
+    await stripImageMetadata(file);
+    assert.equal(reads, 1);
   } finally {
     globalThis.createImageBitmap = oldBitmap;
     globalThis.document = oldDocument;

@@ -10,6 +10,11 @@
 
 # Changelog
 
+## 0.1.3 - 2026-10-24
+
+- Scan PNG chunks from one bounded file buffer instead of performing one asynchronous slice read per chunk.
+- Add regression coverage for PNG files containing thousands of small chunks.
+
 ## 0.1.0 - 2026-10-11
 
 - Initial release: re-encode JPEG and PNG images in-browser to omit embedded metadata from downloaded copies.

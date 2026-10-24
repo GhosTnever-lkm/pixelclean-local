@@ -11,20 +11,18 @@ const PNG_SIGNATURE = [137, 80, 78, 71, 13, 10, 26, 10];
 
 async function isAnimatedPng(file) {
   if (file.type !== "image/png") return false;
-  if (typeof file.slice !== "function") {
+  if (typeof file.arrayBuffer !== "function") {
     throw new Error("This browser cannot inspect PNG files safely.");
   }
   try {
-    const signature = new Uint8Array(await file.slice(0, PNG_SIGNATURE.length).arrayBuffer());
-    if (signature.length < PNG_SIGNATURE.length || !PNG_SIGNATURE.every((value, index) => signature[index] === value)) return false;
+    const data = new Uint8Array(await file.arrayBuffer());
+    if (data.length < PNG_SIGNATURE.length || !PNG_SIGNATURE.every((value, index) => data[index] === value)) return false;
 
     let offset = PNG_SIGNATURE.length;
-    while (offset + 12 <= file.size) {
-      const header = new Uint8Array(await file.slice(offset, offset + 8).arrayBuffer());
-      if (header.length !== 8) return false;
-      const length = new DataView(header.buffer, header.byteOffset, 4).getUint32(0);
-      if (length > file.size - offset - 12) return false;
-      const type = String.fromCharCode(...header.subarray(4, 8));
+    while (offset + 12 <= data.length) {
+      const length = new DataView(data.buffer, data.byteOffset + offset, 4).getUint32(0);
+      if (length > data.length - offset - 12) return false;
+      const type = String.fromCharCode(...data.subarray(offset + 4, offset + 8));
       if (type === "acTL") return true;
       if (type === "IDAT") return false;
       offset += length + 12;
