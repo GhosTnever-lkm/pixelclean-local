@@ -14,7 +14,7 @@
 - Processes at most 20 images per batch, limits each input to 20 MiB, and rejects decoded images above 40 megapixels before allocating the drawing canvas.
 - Supports keeping the source format or converting to PNG/JPEG; JPEG output quality is adjustable.
 
-It is a best-effort metadata removal workflow, not a forensic certification tool. Re-encoding can change image quality and file size. Animated formats, WebP, GIF, HEIC, and metadata inspection are not supported; review the output before sharing.
+It is a best-effort metadata removal workflow, not a forensic certification tool. Re-encoding can change image quality and file size. APNG files are detected and rejected so the app cannot silently export only one frame. Other animated formats, WebP, GIF, HEIC, and metadata inspection are not supported; review the output before sharing.
 
 ## Use it
 

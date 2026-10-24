@@ -7,6 +7,34 @@ const EXTENSIONS = new Map([
   ["image/png", ".png"],
 ]);
 
+const PNG_SIGNATURE = [137, 80, 78, 71, 13, 10, 26, 10];
+
+async function isAnimatedPng(file) {
+  if (file.type !== "image/png") return false;
+  if (typeof file.slice !== "function") {
+    throw new Error("This browser cannot inspect PNG files safely.");
+  }
+  try {
+    const signature = new Uint8Array(await file.slice(0, PNG_SIGNATURE.length).arrayBuffer());
+    if (signature.length < PNG_SIGNATURE.length || !PNG_SIGNATURE.every((value, index) => signature[index] === value)) return false;
+
+    let offset = PNG_SIGNATURE.length;
+    while (offset + 12 <= file.size) {
+      const header = new Uint8Array(await file.slice(offset, offset + 8).arrayBuffer());
+      if (header.length !== 8) return false;
+      const length = new DataView(header.buffer, header.byteOffset, 4).getUint32(0);
+      if (length > file.size - offset - 12) return false;
+      const type = String.fromCharCode(...header.subarray(4, 8));
+      if (type === "acTL") return true;
+      if (type === "IDAT") return false;
+      offset += length + 12;
+    }
+    return false;
+  } catch {
+    throw new Error("Could not inspect this PNG file.");
+  }
+}
+
 export function validateImageMetadata(file, limits = {}) {
   const maxBytes = limits.maxBytes ?? MAX_FILE_BYTES;
   if (!file || typeof file !== "object") return "Choose a JPEG or PNG image.";
@@ -75,6 +103,7 @@ export async function stripImageMetadata(file, options = {}) {
   if (typeof createImageBitmap !== "function" || typeof document === "undefined") {
     throw new Error("This browser does not support local image processing.");
   }
+  if (await isAnimatedPng(file)) throw new Error("Animated PNG (APNG) files are not supported.");
   let bitmap;
   let canvas;
   try {

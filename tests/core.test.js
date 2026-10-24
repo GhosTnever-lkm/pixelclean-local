@@ -5,7 +5,21 @@ import {
   stripImageMetadata, validateImageDimensions, validateImageMetadata,
 } from "../core.js";
 
-const png = (overrides = {}) => ({ name: "map.png", type: "image/png", size: 1200, ...overrides });
+function pngBlob(chunks = []) {
+  const parts = [Uint8Array.from([137, 80, 78, 71, 13, 10, 26, 10])];
+  for (const [type, data = new Uint8Array()] of chunks) {
+    const chunk = new Uint8Array(12 + data.length);
+    new DataView(chunk.buffer).setUint32(0, data.length);
+    chunk.set(new TextEncoder().encode(type), 4);
+    chunk.set(data, 8);
+    parts.push(chunk);
+  }
+  return new Blob(parts);
+}
+
+const staticPng = pngBlob([["IDAT"]]);
+const png = (overrides = {}) => ({ name: "map.png", type: "image/png", size: staticPng.size,
+  slice: (start, end) => staticPng.slice(start, end), ...overrides });
 
 test("accepts bounded JPEG and PNG only", () => {
   assert.equal(validateImageMetadata(png()), null);
@@ -94,6 +108,23 @@ test("fails closed when browser encoding returns a different MIME type", async (
   globalThis.document = { createElement() { return { width: 0, height: 0, getContext() { return { fillRect() {}, drawImage() {} }; }, toBlob(cb) { cb(new Blob(["encoded"], { type: "image/png" })); } }; } };
   try {
     await assert.rejects(stripImageMetadata(png(), { format: "jpeg" }), /does not support/);
+  } finally {
+    globalThis.createImageBitmap = oldBitmap;
+    globalThis.document = oldDocument;
+  }
+});
+
+test("rejects APNG before decoding instead of silently exporting one frame", async () => {
+  const oldBitmap = globalThis.createImageBitmap;
+  const oldDocument = globalThis.document;
+  let decoded = false;
+  globalThis.createImageBitmap = async () => { decoded = true; throw new Error("should not decode"); };
+  globalThis.document = {};
+  const animatedBlob = pngBlob([["acTL", new Uint8Array(8)], ["IDAT"]]);
+  const animatedPng = png({ size: animatedBlob.size, slice: (start, end) => animatedBlob.slice(start, end) });
+  try {
+    await assert.rejects(stripImageMetadata(animatedPng), /Animated PNG.*not supported/);
+    assert.equal(decoded, false);
   } finally {
     globalThis.createImageBitmap = oldBitmap;
     globalThis.document = oldDocument;
