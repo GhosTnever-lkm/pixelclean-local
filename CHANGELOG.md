@@ -1,3 +1,7 @@
+## 0.1.2 - 2026-10-24
+
+- Detect and reject animated PNG (APNG) files before browser decoding so an animated image is not silently reduced to one frame.
+
 ## 0.1.1 - 2026-10-13
 
 - Keep same-named images from different folders as separate queue items.
